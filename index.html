@@ -880,7 +880,7 @@ let adminPw = 'admin', isAdmin = false;
 let perms   = { marquee:true, cd:true };
 let members = ['Vivian','小文','小愛','企劃組'];
 const TAG_COLORS = [
-  {bg:'#FBEAF0',c:'#993556'},{bg:'#E1F5EEE',c:'#0F6E56'},{bg:'#EEEDFE',c:'#3C3489'},
+  {bg:'#FBEAF0',c:'#993556'},{bg:'#E1F5EE',c:'#0F6E56'},{bg:'#EEEDFE',c:'#3C3489'},
   {bg:'#FAEEDA',c:'#854F0B'},{bg:'#E6F1FB',c:'#185FA5'},{bg:'#FDE8FF',c:'#7a1080'},
   {bg:'#E8FFE8',c:'#1a5c1a'},{bg:'#FFF3CC',c:'#7a5c00'}
 ];
@@ -1092,12 +1092,34 @@ window.savePerms = ()=>{ perms.marquee=document.getElementById('perm-marquee').c
 window.changePw  = ()=>{ const nv=document.getElementById('newPwInput').value.trim(); if(!nv)return; adminPw=nv; document.getElementById('newPwInput').value=''; document.getElementById('pwHint').textContent='密碼已更新 ✓'; saveConfig({adminPw}); showToast('密碼已更新'); };
 
 function renderAdminTCP() {
-  document.getElementById('adminTCP').innerHTML=TAG_COLORS.map((c,i)=>`<div class="tcp-swatch ${i===selTagColor?'sel':''}" style="background:${c.bg};border-color:${i===selTagColor?c.c:'transparent'}" onclick="selTagColor=${i};renderAdminTCP()"></div>`).join('');
+  const el = document.getElementById('adminTCP');
+  if (!el) return;
+  el.innerHTML = TAG_COLORS.map((c,i) =>
+    `<div class="tcp-swatch ${i===selTagColor?'sel':''}" data-ci="${i}" style="background:${c.bg};${i===selTagColor?`border-color:${c.c}`:''}"></div>`
+  ).join('');
 }
 window.renderAdminTCP = renderAdminTCP;
+window.selectTagColor = i => { selTagColor=i; renderAdminTCP(); };
+
+// event delegation for color picker — fires once, works forever
+document.addEventListener('click', e => {
+  const sw = e.target.closest('.tcp-swatch');
+  if (sw && sw.dataset.ci !== undefined) {
+    selTagColor = parseInt(sw.dataset.ci);
+    renderAdminTCP();
+  }
+});
 function renderAdminTags() {
-  document.getElementById('adminTagList').innerHTML=tags.map(t=>`<div class="tapill" style="background:${t.bg};color:${t.c}">${t.label}${!t.locked?`<button onclick="removeTag('${t.id}')" style="color:${t.c}">×</button>`:'<span style="font-size:10px;opacity:.35;margin-left:2px">🔒</span>'}</div>`).join('');
+  document.getElementById('adminTagList').innerHTML=tags.map(t=>`
+    <div class="tapill" style="background:${t.bg};color:${t.c}">
+      ${t.label}
+      ${t.locked
+        ? `<span style="opacity:.4;margin-left:4px;font-size:11px">🔒</span>`
+        : `<button onclick="removeTag('${t.id}')" style="color:${t.c};margin-left:4px;font-size:14px;background:none;border:none;cursor:pointer;line-height:1;font-weight:700">×</button>`
+      }
+    </div>`).join('');
 }
+window.renderAdminTags = renderAdminTags;
 window.addTagFromAdmin = ()=>{
   const name=document.getElementById('newTagName').value.trim(); if(!name)return;
   const col=TAG_COLORS[selTagColor]; const id='tag_'+Date.now();
@@ -1627,7 +1649,23 @@ function calRender(){
 window.calSel=(y,m,d)=>{const dt=new Date(y,m,d);calSelDate=calSelDate&&calSelDate.getTime()===dt.getTime()?null:dt;calDate.setFullYear(y);calDate.setMonth(m);calRender();};
 
 /* ══ STICKY ══ */
-function buildColorRow(){document.getElementById('colorRow').innerHTML=SC.map((c,i)=>`<div class="scb ${i===selSC?'sel':''}" style="background:${SH[i]}" onclick="selSC=${i};buildColorRow()"></div>`).join('');}
+function buildColorRow(){
+  const el = document.getElementById('colorRow');
+  if (!el) return;
+  el.innerHTML = SC.map((c,i) =>
+    `<div class="scb ${i===selSC?'sel':''}" data-si="${i}" style="background:${SH[i]}"></div>`
+  ).join('');
+}
+window.buildColorRow = buildColorRow;
+window.selectStickyColor = i => { selSC=i; buildColorRow(); };
+
+document.addEventListener('click', e => {
+  const sb = e.target.closest('.scb');
+  if (sb && sb.dataset.si !== undefined) {
+    selSC = parseInt(sb.dataset.si);
+    buildColorRow();
+  }
+});
 function buildStickyAuthorSelect(){const sel=document.getElementById('stickyAuthorSel');sel.innerHTML=`<option value="">選擇名字...</option>`+members.map(m=>`<option value="${m}">${m}</option>`).join('');}
 window.toggleCompose=()=>{document.getElementById('stickyInbox').classList.remove('open');document.getElementById('stickyCompose').classList.toggle('open');};
 window.toggleInbox=()=>{document.getElementById('stickyCompose').classList.remove('open');document.getElementById('stickyInbox').classList.toggle('open');renderInbox();};
