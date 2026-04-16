@@ -161,17 +161,13 @@ body{background:var(--bg);color:var(--text);}
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
 .empty-col{font-size:12px;color:var(--muted);text-align:center;padding:24px 0;}
 
-/* TASK COMMENTS */
+/* ── CHECKLIST ── */
 .task-comments{margin-top:12px;border-top:1px solid var(--border);padding-top:12px;}
-.tc-title{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;}
-.tc-item{padding:8px;background:var(--bg2);border-radius:8px;margin-bottom:6px;}
+/* ── CHECKLIST ── */
+.checklist{margin-top:4px;}
 .tc-author{font-size:11px;font-weight:600;color:var(--accent);}
 .tc-time{font-size:10px;color:var(--muted);margin-left:6px;}
 .tc-text{font-size:12px;color:var(--text);margin-top:3px;word-break:break-word;}
-.tc-add{display:flex;gap:6px;margin-top:8px;}
-.tc-add input{flex:1;padding:7px 9px;font-size:12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;}
-.tc-add input:focus{border-color:var(--accent);}
-.tc-add button{padding:7px 12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;}
 
 /* DEADLINE ALERT */
 .deadline-alert{background:#fff5f5;border:1px solid #f5c1c1;border-radius:10px;padding:10px 14px;margin-bottom:1rem;display:flex;align-items:flex-start;gap:10px;}
@@ -407,6 +403,17 @@ body{background:var(--bg);color:var(--text);}
 .loading-brand{display:none;}
 .loading-vv{display:none;}
 .loading-double{display:none;}
+
+/* ── CHECKLIST ── */
+.checklist{margin-top:4px;}
+.cl-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;}
+.cl-item:last-child{border-bottom:none;}
+.cl-item input[type=checkbox]{width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:var(--accent);cursor:pointer;}
+.cl-item label{font-size:13px;color:var(--text);line-height:1.5;cursor:pointer;flex:1;}
+.cl-item.done label{text-decoration:line-through;color:var(--muted);opacity:.6;}
+.cl-progress{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.cl-progress-bar{flex:1;height:4px;background:var(--bg2);border-radius:99px;overflow:hidden;}
+.cl-progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .3s;}
 
 /* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;z-index:500;background:#1a1a1a;color:#fff;font-size:13px;padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;}
@@ -721,15 +728,9 @@ body{background:var(--bg);color:var(--text);}
       </div>
     </div>
     <div class="frow"><label class="flabel">接手人員</label><select id="f-assignee"></select></div>
-    <div class="frow"><label class="flabel">備註</label><textarea id="f-note" placeholder="說明、文案重點..."></textarea></div>
-    <div class="task-comments" id="taskComments">
-      <div class="tc-title">💬 任務討論</div>
-      <div id="tcList"></div>
-      <div class="tc-add">
-        <input id="tcAuthor" placeholder="名字" style="width:80px;flex:none;padding:7px 8px;font-size:12px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;">
-        <input id="tcText" placeholder="留言..." onkeydown="if(event.key==='Enter')addTaskComment()">
-        <button onclick="addTaskComment()">送出</button>
-      </div>
+    <div class="frow">
+      <label class="flabel">待辦清單 <span style="font-size:10px;color:var(--muted);font-weight:400">（每行一項，儲存後可勾選）</span></label>
+      <textarea id="f-note" placeholder="貼文合作&#10;Sheena- 動物布章可折大翻領拼紗大學T&#10;芹芹- 暖感午後小動物印花親膚居家套裝" style="min-height:90px"></textarea>
     </div>
     <div class="mact">
       <button class="btn-d" id="deleteBtn" onclick="deleteTask()" style="display:none">刪除</button>
@@ -743,11 +744,9 @@ body{background:var(--bg);color:var(--text);}
 <div class="toast" id="toast"></div>
 
 <!-- FIREBASE SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, push, remove, update }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyBrz0ExG7Hlyv6uS8hJCukZTNGUlnlcD0s",
   authDomain: "vv-double.firebaseapp.com",
@@ -757,9 +756,8 @@ const firebaseConfig = {
   messagingSenderId: "460802602953",
   appId: "1:460802602953:web:e30aca5b6c19fa7599da18"
 };
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
 /* ── helpers ── */
 const ts = () => { const n=new Date(); return `${n.getMonth()+1}/${n.getDate()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; };
@@ -767,8 +765,6 @@ const ts = () => { const n=new Date(); return `${n.getMonth()+1}/${n.getDate()} 
 /* ══ CONFIG ══ */
 const MARKETING_PW = 'vvdoublem';
 const DB_ROOT = 'marketing';
-const dbRef = path => ref(db, path);
-const teamRef = path => ref(db, DB_ROOT + '/' + path);
 
 /* ══ LOGIN ══ */
 window.doLogin = () => {
@@ -827,19 +823,22 @@ let calDate=new Date(); calDate.setDate(1);
 let calCollapsed=false, calSelDate=null;
 
 /* ══════════════ FIREBASE READ/WRITE ══════════════ */
+const teamRef = path => db.ref(DB_ROOT + '/' + path);
+const dbRef   = path => db.ref(path);
+
 async function fbSet(path, val) {
   setSyncing(true);
-  try { await set(ref(db, path), val); } catch(e){ showToast('同步失敗，請檢查網路'); setOffline(); }
+  try { await db.ref(path).set(val); } catch(e){ showToast('同步失敗，請檢查網路'); setOffline(); }
   setSyncing(false);
 }
 async function fbUpdate(path, val) {
   setSyncing(true);
-  try { await update(ref(db, path), val); } catch(e){ showToast('同步失敗'); setOffline(); }
+  try { await db.ref(path).update(val); } catch(e){ showToast('同步失敗'); setOffline(); }
   setSyncing(false);
 }
 async function fbRemove(path) {
   setSyncing(true);
-  try { await remove(ref(db, path)); } catch(e){ showToast('同步失敗'); setOffline(); }
+  try { await db.ref(path).remove(); } catch(e){ showToast('同步失敗'); setOffline(); }
   setSyncing(false);
 }
 function saveConfig(patch) {
@@ -848,7 +847,7 @@ function saveConfig(patch) {
 
 /* ── load config (marquee, tags, members, perms, countdowns) ── */
 async function loadConfig() {
-  const snap = await get(teamRef('config'));
+  const snap = await teamRef('config').get();
   if (snap.exists()) {
     const d = snap.val();
     if (d.adminPw)           adminPw = d.adminPw;
@@ -859,14 +858,13 @@ async function loadConfig() {
     if (d.countdowns)        countdowns = Object.values(d.countdowns||{});
     if (d.nextCdId)          nextCdId = d.nextCdId;
   } else {
-    // First run defaults
     await fbSet(DB_ROOT+'/config', { adminPw, perms, members, tags, marqueeMessages, countdowns:{}, nextCdId:1 });
   }
 }
 
 /* ── tasks realtime listener ── */
 function listenTasks() {
-  onValue(teamRef('tasks'), snap => {
+  teamRef('tasks').on('value', snap => {
     const raw = snap.val() || {};
     tasks = Object.entries(raw).map(([fbKey, t]) => ({...t, fbKey}));
     tasks.sort((a,b)=>a.id-b.id);
@@ -879,7 +877,7 @@ function listenTasks() {
 
 /* ── stickies realtime listener ── */
 function listenStickies() {
-  onValue(teamRef('stickies'), snap => {
+  teamRef('stickies').on('value', snap => {
     const raw = snap.val() || {};
     const incoming = Object.entries(raw).map(([fbKey, s]) => ({...s, fbKey}));
     // add newly arrived stickies
@@ -907,16 +905,16 @@ async function dbSaveTask(data) {
     const t = tasks.find(x=>x.id===editingId);
     if (t && t.fbKey) await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, data);
   } else {
-    const newRef = push(teamRef('tasks'));
-    await set(newRef, {...data, id:nextId++, comments:[], createdAt:new Date().toISOString().slice(0,10)});
+    const newRef = teamRef('tasks').push();
+    await newRef.set( {...data, id:nextId++, comments:[], createdAt:new Date().toISOString().slice(0,10)});
   }
 }
 async function dbDeleteTask(t) {
   if (t && t.fbKey) await fbRemove(`${DB_ROOT}/tasks/${t.fbKey}`);
 }
 async function dbCopyTask(data) {
-  const newRef = push(teamRef('tasks'));
-  await set(newRef, {...data, id:nextId++, comments:[], createdAt:new Date().toISOString().slice(0,10)});
+  const newRef = teamRef('tasks').push();
+  await newRef.set( {...data, id:nextId++, comments:[], createdAt:new Date().toISOString().slice(0,10)});
 }
 async function dbUpdateTaskComments(t, comments) {
   if (t && t.fbKey) await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, {comments});
@@ -939,9 +937,9 @@ async function dbQuickStatus(id, newStatus) {
 
 /* ══ COUNTDOWN CRUD ══ */
 async function dbAddCountdown(name, date) {
-  const newRef = push(teamRef('config/countdowns'));
+  const newRef = teamRef('config/countdowns').push();
   const cd = {id:nextCdId++, name, date, fbKey:newRef.key};
-  await set(newRef, cd);
+  await newRef.set( cd);
   countdowns.push(cd);
   await saveConfig({nextCdId});
   renderCountdowns();
@@ -955,8 +953,8 @@ async function dbRemoveCountdown(id) {
 
 /* ══ STICKY CRUD ══ */
 async function dbPostSticky(s) {
-  const newRef = push(teamRef('stickies'));
-  await set(newRef, {...s, fbKey:newRef.key});
+  const newRef = teamRef('stickies').push();
+  await newRef.set( {...s, fbKey:newRef.key});
 }
 async function dbHideSticky(fbKey) {
   await fbUpdate(`${DB_ROOT}/stickies/${fbKey}`, {hidden:true});
@@ -1245,7 +1243,7 @@ function renderInlineKanban() {
         <div class="card-top"><span class="ctag" style="background:${tg.bg};color:${tg.c}">${tg.label}</span>${badge}</div>
         <div class="card-title">${t.title}</div>
         ${t.assignee?`<div class="card-assignee">👤 ${t.assignee}</div>`:''}
-        ${t.note?`<div class="card-meta">${t.note.slice(0,36)}${t.note.length>36?'…':''}</div>`:''}
+        ${cardChecklistHtml(t)}
         <div class="card-footer">
           <span class="card-date" style="${over?'color:#E24B4A':''}">${t.date?(over?'⚠ ':'')+'截止 '+t.date.slice(5).replace('-','/'):'—'}</span>
           <div class="card-actions">
@@ -1448,7 +1446,7 @@ function renderKanban(){
         <div class="card-top"><span class="ctag" style="background:${tg.bg};color:${tg.c}">${tg.label}</span>${badge}</div>
         <div class="card-title">${t.title}</div>
         ${t.assignee?`<div class="card-assignee">👤 ${t.assignee}</div>`:''}
-        ${t.note?`<div class="card-meta">${t.note.slice(0,36)}${t.note.length>36?'…':''}</div>`:''}
+        ${cardChecklistHtml(t)}
         <div class="card-footer">
           <span class="card-date" style="${over?'color:#E24B4A':''}">${t.date?(over?'⚠ ':'')+'截止 '+t.date.slice(5).replace('-','/'):'—'}</span>
           <div class="card-actions">
@@ -1496,8 +1494,8 @@ window.openTaskModal = ()=>{
   document.getElementById('f-priority').value='mid';
   document.getElementById('deleteBtn').style.display='none';
   document.getElementById('copyBtn').style.display='none';
-  document.getElementById('tcList').innerHTML='';
-  document.getElementById('tcText').value='';
+  const clPreview=document.getElementById('clPreview');
+  if(clPreview) clPreview.innerHTML='';
   populateTagSelect();populateAssigneeSelect('');
   openOv('taskModal');
 };
@@ -1509,19 +1507,76 @@ window.openEditModal = id=>{
   document.getElementById('f-status').value=t.status;
   document.getElementById('f-date').value=t.date||'';
   document.getElementById('f-priority').value=t.priority;
-  document.getElementById('f-note').value=t.note||'';
   document.getElementById('deleteBtn').style.display='block';
   document.getElementById('copyBtn').style.display='block';
   populateTagSelect();document.getElementById('f-tag').value=t.tag;
   populateAssigneeSelect(t.assignee);
-  renderTaskComments(t);
+  // Load checklist into textarea (show text for editing)
+  if(t.checklist && t.checklist.length){
+    document.getElementById('f-note').value=t.checklist.map(c=>c.text).join('\n');
+  } else {
+    document.getElementById('f-note').value=t.note||'';
+  }
+  // Show live checklist below textarea
+  let clPreview=document.getElementById('clPreview');
+  if(!clPreview){clPreview=document.createElement('div');clPreview.id='clPreview';document.getElementById('f-note').parentNode.appendChild(clPreview);}
+  if(t.checklist&&t.checklist.length){
+    const done=t.checklist.filter(c=>c.done).length;
+    const pct=Math.round(done/t.checklist.length*100);
+    clPreview.innerHTML=buildCLHtml(t.id,t.checklist,done,pct);
+  } else {
+    clPreview.innerHTML='';
+  }
   openOv('taskModal');
 };
 window.saveTask = async()=>{
   const title=document.getElementById('f-title').value.trim();if(!title){document.getElementById('f-title').focus();return;}
-  const data={title,tag:document.getElementById('f-tag').value,status:document.getElementById('f-status').value,date:document.getElementById('f-date').value,priority:document.getElementById('f-priority').value,note:document.getElementById('f-note').value.trim(),assignee:document.getElementById('f-assignee').value};
+  const noteRaw=document.getElementById('f-note').value.trim();
+  // Parse lines into checklist, preserve existing checked states
+  const existingTask=editingId?tasks.find(x=>x.id===editingId):null;
+  const existingCL=existingTask?.checklist||[];
+  const checklist=noteRaw?noteRaw.split('\n').filter(l=>l.trim()).map((l,i)=>{
+    const existing=existingCL.find(c=>c.text===l.trim());
+    return {text:l.trim(), done: existing?existing.done:false, idx:i};
+  }):[];
+  const data={title,tag:document.getElementById('f-tag').value,status:document.getElementById('f-status').value,date:document.getElementById('f-date').value,priority:document.getElementById('f-priority').value,note:noteRaw,checklist,assignee:document.getElementById('f-assignee').value};
   await dbSaveTask(data);closeOv('taskModal');showToast(editingId?'已更新任務':'已新增任務');
+window.handleCLClick = async(taskId, idx)=>{
+  const t=tasks.find(x=>x.id===taskId);if(!t||!t.fbKey)return;
+  const checklist=[...(t.checklist||[])];
+  if(checklist[idx]) checklist[idx]={...checklist[idx],done:!checklist[idx].done};
+  await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`,{checklist});
+  const done=checklist.filter(c=>c.done).length;
+  const pct=Math.round(done/checklist.length*100);
+  const clPreview=document.getElementById('clPreview');
+  if(clPreview) clPreview.innerHTML=buildCLHtml(taskId,checklist,done,pct);
 };
+
+function cardChecklistHtml(t){
+  if(t.checklist&&t.checklist.length){
+    const d=t.checklist.filter(c=>c.done).length,total=t.checklist.length,p=Math.round(d/total*100);
+    return '<div style="margin-top:4px"><div class="cl-progress" style="margin-bottom:2px">'
+      +'<span style="white-space:nowrap;font-size:10px">'+d+'/'+total+'</span>'
+      +'<div class="cl-progress-bar" style="height:3px"><div class="cl-progress-fill" style="width:'+p+'%"></div></div>'
+      +'</div></div>';
+  }
+  return t.note?('<div class="card-meta">'+t.note.slice(0,36)+(t.note.length>36?'…':'')+'</div>'):'';
+}
+function buildCLHtml(taskId,checklist,done,pct){
+  const items=checklist.map((c,i)=>{
+    const checked=c.done?'checked':'';
+    const cls=c.done?'done':'';
+    return '<div class="cl-item '+cls+'" onclick="handleCLClick('+taskId+','+i+')">'
+      +'<input type="checkbox" '+checked+' onclick="event.stopPropagation();handleCLClick('+taskId+','+i+')">'
+      +'<label>'+c.text+'</label></div>';
+  }).join('');
+  return '<div style="margin-top:10px">'
+    +'<div class="cl-progress"><span style="white-space:nowrap">'+done+'/'+checklist.length+' 完成</span>'
+    +'<div class="cl-progress-bar"><div class="cl-progress-fill" style="width:'+pct+'%"></div></div>'
+    +'<span>'+pct+'%</span></div>'
+    +'<div class="checklist">'+items+'</div></div>';
+}
+
 window.deleteTask = async()=>{
   if(!editingId||!confirm('確定要刪除？'))return;
   const t=tasks.find(x=>x.id===editingId);
@@ -1535,22 +1590,6 @@ window.copyTask = async()=>{
   const {fbKey,...data}=t;
   await dbCopyTask({...data,title:'[複製] '+t.title,status:'todo',comments:[]});
   closeOv('taskModal');showToast('任務已複製');
-};
-
-/* ══ TASK COMMENTS ══ */
-function renderTaskComments(t){
-  const list=document.getElementById('tcList'),comments=t.comments||[];
-  if(!comments.length){list.innerHTML='<div style="font-size:11px;color:var(--muted);padding:4px 0">還沒有留言</div>';return;}
-  list.innerHTML=comments.map(c=>`<div class="tc-item"><span class="tc-author">${c.author}</span><span class="tc-time">${c.time}</span><div class="tc-text">${c.text}</div></div>`).join('');
-}
-window.addTaskComment = async()=>{
-  if(!editingId)return;
-  const author=document.getElementById('tcAuthor').value.trim()||'匿名';
-  const text=document.getElementById('tcText').value.trim();if(!text)return;
-  await dbAddComment(editingId,{author,text,time:ts()});
-  document.getElementById('tcText').value='';
-  // update local view
-  const t=tasks.find(x=>x.id===editingId);if(t)renderTaskComments(t);
 };
 
 /* ══ MINI CALENDAR ══ */
