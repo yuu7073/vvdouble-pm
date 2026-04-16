@@ -397,7 +397,8 @@ body{background:var(--bg);color:var(--text);}
 .team-badge.store{background:#E8F4FF;color:#1a5fa8;}
 
 /* LOADING SCREEN */
-.loading-screen{position:fixed;inset:0;background:#F5A623;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:20px;}
+.loading-screen{position:fixed;inset:0;background:#F5A623;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:20px;}
+.loading-screen.active{display:flex;}
 .loading-screen.done{display:none;}
 .loading-logo-img{width:200px;height:200px;border-radius:24px;object-fit:cover;}
 .loading-sub{font-size:12px;color:rgba(255,255,255,.85);letter-spacing:2px;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;}
@@ -433,12 +434,12 @@ body{background:var(--bg);color:var(--text);}
     <div style="font-size:24px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-bottom:4px">VV DOUBLE</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:28px">行銷專案管理系統</div>
     <label style="font-size:12px;color:var(--text2);text-align:left;margin-bottom:6px;display:block">密碼</label>
-    <input type="password" id="loginPw" style="width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:10px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="loginPw" style="width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:10px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;" placeholder="輸入密碼">
     <div id="loginErr" style="font-size:12px;color:#E24B4A;margin-bottom:10px;min-height:18px;"></div>
     <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-bottom:16px;cursor:pointer;">
       <input type="checkbox" id="rememberMe" checked> 記住登入狀態
     </label>
-    <button onclick="doLogin()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">進入</button>
+    <button id="loginBtn" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">進入</button>
   </div>
 </div>
 <div class="page" id="mainPage">
@@ -782,6 +783,8 @@ window.doLogin = () => {
   document.getElementById('loginScreen').style.display = 'none';
   initApp();
 };
+document.getElementById('loginBtn').addEventListener('click', window.doLogin);
+document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') window.doLogin(); });
 window.doLogout = () => {
   localStorage.removeItem('vvd_mkt_auth');
   sessionStorage.removeItem('vvd_mkt_auth');
@@ -1733,7 +1736,7 @@ window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=ms
 async function initApp() {
   const savedTheme = localStorage.getItem('vvdouble_theme') || 'light';
   setTheme(savedTheme);
-  document.getElementById('loadingScreen').style.display = '';
+  document.getElementById('loadingScreen').classList.add('active');
   document.getElementById('loadingMsg').textContent = '載入設定中...';
   try {
     await loadConfig();
@@ -1762,7 +1765,7 @@ async function initApp() {
 // Check saved auth
 if (localStorage.getItem('vvd_mkt_auth')==='1' || sessionStorage.getItem('vvd_mkt_auth')==='1') {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('loadingScreen').style.display = '';
+  document.getElementById('loadingScreen').classList.add('active');
   initApp();
 }
 </script>
