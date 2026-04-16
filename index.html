@@ -357,7 +357,7 @@ body{background:var(--bg);color:var(--text);}
 .avg-days{font-weight:600;color:var(--accent);}
 
 /* view toggle for main */
-.main-view-tabs{display:flex;gap:0;border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:1.25rem;}
+.main-view-tabs{display:flex;gap:0;border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:1.25rem;flex-wrap:wrap;}
 .mvt-btn{padding:7px 18px;font-size:13px;cursor:pointer;border:none;background:transparent;color:var(--muted);transition:background .15s,color .15s;flex:1;text-align:center;}
 .mvt-btn.active{background:var(--bg2);color:var(--text);font-weight:500;}
 
@@ -387,7 +387,7 @@ body{background:var(--bg);color:var(--text);}
 .space-switch-btn:hover{border-color:var(--accent);color:var(--accent);}
 .space-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:10px;box-shadow:0 4px 16px var(--shadow);min-width:140px;overflow:hidden;z-index:200;
   opacity:0;pointer-events:none;transform:translateY(-4px);transition:opacity .15s,transform .15s;}
-#spaceCheck:checked ~ .space-menu{opacity:1;pointer-events:auto;transform:translateY(0);}
+
 .space-menu-item{padding:10px 14px;font-size:13px;color:var(--text);cursor:pointer;transition:background .1s;}
 .space-menu-item:hover{background:var(--bg2);}
 .space-menu-item.current{color:var(--accent);font-weight:600;}
@@ -427,36 +427,18 @@ body{background:var(--bg);color:var(--text);}
   <span id="syncText">已連線</span>
 </div>
 
-<!-- ═══ TEAM SELECTOR ═══ -->
-<div class="page active" id="teamSelectPage">
-  <div class="ts-wrap">
-    <div class="ts-logo">
-      <div class="brand-dot" style="width:12px;height:12px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:8px"></div>
-      <span style="font-size:20px;font-weight:700;letter-spacing:.04em">VV DOUBLE</span>
-    </div>
-    <div class="ts-title">請選擇登入空間</div>
-    <div class="ts-cards">
-      <div class="ts-card" onclick="selectTeam('marketing')">
-        <div class="ts-card-icon">📣</div>
-        <div class="ts-card-name">行銷 Team</div>
-        <div class="ts-card-sub">社群 · 電商 · 聯名</div>
-      </div>
-      <div class="ts-card" onclick="selectTeam('store')">
-        <div class="ts-card-icon">🏪</div>
-        <div class="ts-card-name">門市 Team</div>
-        <div class="ts-card-sub">門市任務排程</div>
-      </div>
-    </div>
-    <!-- Password Step -->
-    <div class="ts-pw-step hidden" id="tsPwStep">
-      <div class="ts-pw-label" id="tsPwLabel">輸入行銷 Team 密碼</div>
-      <div class="ts-pw-row">
-        <input type="password" id="tsPwInput" class="ts-pw-input" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')confirmTeam()">
-        <button class="ts-pw-btn" onclick="confirmTeam()">進入</button>
-      </div>
-      <div class="ts-pw-err hidden" id="tsPwErr">密碼錯誤，請再試一次</div>
-      <button class="ts-back-btn" onclick="backToSelect()">← 重新選擇</button>
-    </div>
+<!-- LOGIN -->
+<div id="loginScreen" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:340px;box-shadow:0 8px 32px var(--shadow);text-align:center;">
+    <div style="font-size:24px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-bottom:4px">VV DOUBLE</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:28px">行銷專案管理系統</div>
+    <label style="font-size:12px;color:var(--text2);text-align:left;margin-bottom:6px;display:block">密碼</label>
+    <input type="password" id="loginPw" style="width:100%;padding:11px 14px;border:1px solid var(--border2);border-radius:10px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit;outline:none;margin-bottom:12px;" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')doLogin()">
+    <div id="loginErr" style="font-size:12px;color:#E24B4A;margin-bottom:10px;min-height:18px;"></div>
+    <label style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin-bottom:16px;cursor:pointer;">
+      <input type="checkbox" id="rememberMe" checked> 記住登入狀態
+    </label>
+    <button onclick="doLogin()" style="width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">進入</button>
   </div>
 </div>
 <div class="page" id="mainPage">
@@ -484,14 +466,7 @@ body{background:var(--bg);color:var(--text);}
       </div>
       <button class="add-btn" onclick="openTaskModal()">+ 新增任務</button>
       <button class="admin-btn" id="adminToggleBtn" onclick="handleAdminBtn()">⚙ 管理員</button>
-      <div class="space-switcher" id="spaceSwitcher">
-        <input type="checkbox" id="spaceCheck" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
-        <label class="space-switch-btn" for="spaceCheck">🔄 切換空間 ▾</label>
-        <div class="space-menu" id="spaceMenu">
-          <div class="space-menu-item" id="smMarketing" onclick="switchTeam('marketing')">📣 行銷 Team</div>
-          <div class="space-menu-item" id="smStore" onclick="switchTeam('store')">🏪 門市 Team</div>
-        </div>
-      </div>
+      <button class="logout-btn" onclick="doLogout()" style="padding:7px 14px;border:1px solid #f5c1c1;border-radius:8px;background:var(--surface);color:#cc4444;font-size:13px;cursor:pointer;font-family:inherit;">登出</button>
     </div>
   </div>
   <div class="deadline-alert hidden" id="deadlineAlert">
@@ -504,6 +479,7 @@ body{background:var(--bg);color:var(--text);}
     <button class="mvt-btn active" id="tab-dash" onclick="switchMainTab('dash')">📊 總覽儀表板</button>
     <button class="mvt-btn" id="tab-kanban" onclick="switchMainTab('kanban')">看板</button>
     <button class="mvt-btn" id="tab-list" onclick="switchMainTab('list')">清單</button>
+    <button class="mvt-btn" id="tab-sticky" onclick="switchMainTab('sticky')">🗒 便利貼</button>
   </div>
 
   <!-- DASHBOARD TAB -->
@@ -550,6 +526,18 @@ body{background:var(--bg);color:var(--text);}
       <div class="list-header"><span>任務名稱</span><span>類型</span><span>狀態</span><span>接手人</span><span>截止日</span><span>優先度</span></div>
       <div id="listBody"></div>
     </div>
+  </div>
+
+  <!-- STICKY TAB -->
+  <div id="stickyView" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:13px;color:var(--muted)">所有便利貼一覽</div>
+      <div style="display:flex;gap:8px">
+        <button class="add-btn" onclick="toggleCompose()">🗒 新增便利貼</button>
+        <button class="admin-btn" onclick="realignStickies()">⇥ 重新對齊</button>
+      </div>
+    </div>
+    <div id="stickyPageGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;"></div>
   </div>
 </div>
 </div>
@@ -689,6 +677,7 @@ body{background:var(--bg);color:var(--text);}
   <div class="sfab-row">
     <button class="sfab" onclick="toggleCompose()">🗒 新增便利貼</button>
     <button class="sfab" onclick="toggleInbox()">📋 便利貼 <span id="stickyCount">0</span></button>
+    <button class="sfab" onclick="realignStickies()" title="重新對齊成一直線">⇥ 對齊</button>
   </div>
 </div>
 
@@ -774,89 +763,29 @@ const db = getDatabase(app);
 /* ── helpers ── */
 const ts = () => { const n=new Date(); return `${n.getMonth()+1}/${n.getDate()} ${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`; };
 
-/* ══ TEAM CONFIG ══ */
-const TEAM_CONFIG = {
-  marketing: {
-    password: 'vvdoublem',
-    adminPwKey: 'marketing/config/adminPw',
-    label: '行銷 Team',
-    brandSub: '行銷排程',
-    badgeClass: 'marketing',
-    defaultTags: [
-      {id:'ig',   label:'Instagram',bg:'#FBEAF0',c:'#993556',locked:true},
-      {id:'ecom', label:'電商促銷', bg:'#E1F5EE',c:'#0F6E56',locked:true},
-      {id:'col',  label:'聯名合作', bg:'#EEEDFE',c:'#3C3489',locked:true},
-      {id:'store',label:'門市活動', bg:'#FAEEDA',c:'#854F0B',locked:true},
-      {id:'threads',label:'Threads',bg:'#E6F1FB',c:'#185FA5',locked:true},
-    ],
-    defaultMembers: ['Vivian','小文','小愛','企劃組'],
-    defaultMarquee: ['今天衝母親節預購，大家加油！✨','截止前最後衝刺，棉花糖女孩最美！'],
-    showMarquee: true,
-    showSticky: true,
-    showCountdown: true,
-  },
-  store: {
-    password: 'vvdoubles',
-    adminPwKey: 'store/config/adminPw',
-    label: '門市 Team',
-    brandSub: '門市排程',
-    badgeClass: 'store',
-    defaultTags: [
-      {id:'display',label:'陳列佈置',bg:'#FBEAF0',c:'#993556',locked:true},
-      {id:'stock',  label:'庫存補貨',bg:'#E1F5EE',c:'#0F6E56',locked:true},
-      {id:'event',  label:'門市活動',bg:'#FAEEDA',c:'#854F0B',locked:true},
-      {id:'training',label:'教育訓練',bg:'#EEEDFE',c:'#3C3489',locked:true},
-      {id:'daily',  label:'日常作業',bg:'#E6F1FB',c:'#185FA5',locked:true},
-    ],
-    defaultMembers: ['台北忠孝','台北統一','桃園ATT','台中一中','台南新天地','高雄新堀江'],
-    defaultMarquee: [],
-    showMarquee: false,
-    showSticky: false,
-    showCountdown: false,
-  }
-};
-let currentTeam = null; // 'marketing' | 'store'
-let teamDbPrefix = ''; // 'marketing' | 'store'
+/* ══ CONFIG ══ */
+const MARKETING_PW = 'vvdoublem';
+const DB_ROOT = 'marketing';
 const dbRef = path => ref(db, path);
-const teamRef = path => ref(db, teamDbPrefix + '/' + path);
+const teamRef = path => ref(db, DB_ROOT + '/' + path);
 
-/* ══ TEAM SELECTOR ══ */
-let selectedTeam = null;
-window.selectTeam = team => {
-  selectedTeam = team;
-  document.querySelectorAll('.ts-card').forEach((c,i)=>{
-    c.classList.toggle('selected', i===(team==='marketing'?0:1));
-  });
-  const step = document.getElementById('tsPwStep');
-  document.getElementById('tsPwLabel').textContent = `輸入 ${TEAM_CONFIG[team].label} 密碼`;
-  document.getElementById('tsPwInput').value = '';
-  document.getElementById('tsPwErr').classList.add('hidden');
-  step.classList.remove('hidden');
-  setTimeout(()=>document.getElementById('tsPwInput').focus(), 100);
-};
-window.backToSelect = () => {
-  selectedTeam = null;
-  document.querySelectorAll('.ts-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('tsPwStep').classList.add('hidden');
-};
-window.confirmTeam = async () => {
-  const pw = document.getElementById('tsPwInput').value;
-  if (!selectedTeam) return;
-  if (pw !== TEAM_CONFIG[selectedTeam].password) {
-    document.getElementById('tsPwErr').classList.remove('hidden');
-    document.getElementById('tsPwInput').value = '';
-    document.getElementById('tsPwInput').focus();
+/* ══ LOGIN ══ */
+window.doLogin = () => {
+  const pw = document.getElementById('loginPw').value;
+  if (pw !== MARKETING_PW) {
+    document.getElementById('loginErr').textContent = '密碼錯誤，請再試一次';
     return;
   }
-  currentTeam = selectedTeam;
-  teamDbPrefix = selectedTeam;
-  // hide selector, show loading
-  document.getElementById('teamSelectPage').classList.remove('active');
-  document.getElementById('loadingScreen').classList.remove('done');
-  document.getElementById('loadingScreen').style.display = '';
-  document.getElementById('loadingMsg').textContent = '載入資料中...';
-  // init app
-  await initApp();
+  const remember = document.getElementById('rememberMe').checked;
+  if (remember) localStorage.setItem('vvd_mkt_auth','1');
+  else sessionStorage.setItem('vvd_mkt_auth','1');
+  document.getElementById('loginScreen').style.display = 'none';
+  initApp();
+};
+window.doLogout = () => {
+  localStorage.removeItem('vvd_mkt_auth');
+  sessionStorage.removeItem('vvd_mkt_auth');
+  location.reload();
 };
 
 /* ── SYNC UI ── */
@@ -911,12 +840,11 @@ async function fbRemove(path) {
   setSyncing(false);
 }
 function saveConfig(patch) {
-  fbUpdate(teamDbPrefix+'/config', patch);
+  fbUpdate(DB_ROOT+'/config', patch);
 }
 
 /* ── load config (marquee, tags, members, perms, countdowns) ── */
 async function loadConfig() {
-  const cfg = TEAM_CONFIG[currentTeam];
   const snap = await get(teamRef('config'));
   if (snap.exists()) {
     const d = snap.val();
@@ -928,11 +856,8 @@ async function loadConfig() {
     if (d.countdowns)        countdowns = Object.values(d.countdowns||{});
     if (d.nextCdId)          nextCdId = d.nextCdId;
   } else {
-    // First run: push defaults for this team
-    tags = cfg.defaultTags;
-    members = cfg.defaultMembers;
-    marqueeMessages = cfg.defaultMarquee;
-    await fbSet(teamDbPrefix+'/config', { adminPw, perms, members, tags, marqueeMessages, countdowns:{}, nextCdId:1 });
+    // First run defaults
+    await fbSet(DB_ROOT+'/config', { adminPw, perms, members, tags, marqueeMessages, countdowns:{}, nextCdId:1 });
   }
 }
 
@@ -951,7 +876,6 @@ function listenTasks() {
 
 /* ── stickies realtime listener ── */
 function listenStickies() {
-  if (!TEAM_CONFIG[currentTeam].showSticky) return;
   onValue(teamRef('stickies'), snap => {
     const raw = snap.val() || {};
     const incoming = Object.entries(raw).map(([fbKey, s]) => ({...s, fbKey}));
@@ -969,6 +893,8 @@ function listenStickies() {
       if (!stickies.find(s=>s.fbKey===id)) el.remove();
     });
     updateStickyCount();
+    renderInbox();
+    if (document.getElementById('stickyView')?.style.display !== 'none') renderStickyPage();
   }, ()=>{});
 }
 
@@ -976,24 +902,24 @@ function listenStickies() {
 async function dbSaveTask(data) {
   if (editingId) {
     const t = tasks.find(x=>x.id===editingId);
-    if (t && t.fbKey) await fbUpdate(`${teamDbPrefix}/tasks/${t.fbKey}`, data);
+    if (t && t.fbKey) await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, data);
   } else {
     const newRef = push(teamRef('tasks'));
     await set(newRef, {...data, id:nextId++, comments:[], createdAt:new Date().toISOString().slice(0,10)});
   }
 }
 async function dbDeleteTask(t) {
-  if (t && t.fbKey) await fbRemove(`${teamDbPrefix}/tasks/${t.fbKey}`);
+  if (t && t.fbKey) await fbRemove(`${DB_ROOT}/tasks/${t.fbKey}`);
 }
 async function dbCopyTask(data) {
   const newRef = push(teamRef('tasks'));
   await set(newRef, {...data, id:nextId++, comments:[], createdAt:new Date().toISOString().slice(0,10)});
 }
 async function dbUpdateTaskComments(t, comments) {
-  if (t && t.fbKey) await fbUpdate(`${teamDbPrefix}/tasks/${t.fbKey}`, {comments});
+  if (t && t.fbKey) await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, {comments});
 }
 async function dbUpdateTaskStatus(t, newStatus) {
-  if (t && t.fbKey) { await fbUpdate(`${teamDbPrefix}/tasks/${t.fbKey}`, {status:newStatus}); showToast(`已移至「${SL[newStatus]}」`); }
+  if (t && t.fbKey) { await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, {status:newStatus}); showToast(`已移至「${SL[newStatus]}」`); }
 }
 
 /* ══ TASK CRUD ══ */
@@ -1001,11 +927,11 @@ async function dbAddComment(taskId, comment) {
   const t = tasks.find(x=>x.id===taskId);
   if (!t || !t.fbKey) return;
   const comments = [...(t.comments||[]), comment];
-  await fbUpdate(`${teamDbPrefix}/tasks/${t.fbKey}`, {comments});
+  await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, {comments});
 }
 async function dbQuickStatus(id, newStatus) {
   const t = tasks.find(x=>x.id===id);
-  if (t && t.fbKey) { await fbUpdate(`${teamDbPrefix}/tasks/${t.fbKey}`, {status:newStatus}); showToast(`已移至「${SL[newStatus]}」`); }
+  if (t && t.fbKey) { await fbUpdate(`${DB_ROOT}/tasks/${t.fbKey}`, {status:newStatus}); showToast(`已移至「${SL[newStatus]}」`); }
 }
 
 /* ══ COUNTDOWN CRUD ══ */
@@ -1019,7 +945,7 @@ async function dbAddCountdown(name, date) {
 }
 async function dbRemoveCountdown(id) {
   const cd = countdowns.find(c=>c.id===id);
-  if (cd && cd.fbKey) { await fbRemove(`${teamDbPrefix}/config/countdowns/${cd.fbKey}`); }
+  if (cd && cd.fbKey) { await fbRemove(`${DB_ROOT}/config/countdowns/${cd.fbKey}`); }
   countdowns = countdowns.filter(c=>c.id!==id);
   renderCountdowns();
 }
@@ -1030,10 +956,10 @@ async function dbPostSticky(s) {
   await set(newRef, {...s, fbKey:newRef.key});
 }
 async function dbHideSticky(fbKey) {
-  await fbUpdate(`${teamDbPrefix}/stickies/${fbKey}`, {hidden:true});
+  await fbUpdate(`${DB_ROOT}/stickies/${fbKey}`, {hidden:true});
 }
 async function dbDeleteSticky(fbKey) {
-  await fbRemove(`${teamDbPrefix}/stickies/${fbKey}`);
+  await fbRemove(`${DB_ROOT}/stickies/${fbKey}`);
 }
 
 /* ══ THEME ══ */
@@ -1224,13 +1150,14 @@ window.switchView = v=>{
 
 /* ══ MAIN TAB SWITCH ══ */
 window.switchMainTab = tab => {
-  ['dash','kanban','list'].forEach(t => {
+  ['dash','kanban','list','sticky'].forEach(t => {
     document.getElementById(t+'View').style.display = t===tab ? '' : 'none';
     document.getElementById('tab-'+t).classList.toggle('active', t===tab);
   });
   if (tab==='kanban') { renderFilterBar('filterBarKanban'); renderKanban(); }
   if (tab==='list')   { renderFilterBar('filterBarList');   renderList(); }
   if (tab==='dash')   { renderDashboard(); }
+  if (tab==='sticky') { renderStickyPage(); }
 };
 
 /* ══ DASHBOARD ══ */
@@ -1672,96 +1599,147 @@ window.toggleInbox=()=>{document.getElementById('stickyCompose').classList.remov
 window.postSticky=async()=>{
   const author=document.getElementById('stickyAuthorSel').value||'匿名';
   const text=document.getElementById('stickyText').value.trim();if(!text)return;
-  const s={author,text,color:SC[selSC],x:80+Math.random()*Math.max(60,window.innerWidth-330),y:150+Math.random()*Math.max(60,window.innerHeight-280),time:ts(),hidden:false};
+  const s={author,text,color:SC[selSC],time:ts(),hidden:false};
   await dbPostSticky(s);
   document.getElementById('stickyText').value='';
   document.getElementById('stickyCompose').classList.remove('open');
-  showToast('留言已貼上');
+  showToast('便利貼已貼上');
 };
+
+// sticky positioning constants
+const STICKY_SNAP_X = 28;
+const STICKY_HEADER_H = 220;
+let stickyRenderIdx = 0;
+window.stickyUserMoved = {};
+window._stickyDragged = false;
+
+function getStickyInitPos(idx){ return {x:STICKY_SNAP_X, y:STICKY_HEADER_H + idx*185}; }
+
 function renderStickyEl(s){
   if(document.getElementById(`s-${s.fbKey}`))return;
   const el=document.createElement('div');
   el.className=`sticky ${s.color}`;el.id=`s-${s.fbKey}`;
-  el.style.left=s.x+'px';el.style.top=s.y+'px';el.style.zIndex=51;
+  const userMoved=(window.stickyUserMoved||{})[s.fbKey];
+  const pos=getStickyInitPos(stickyRenderIdx++);
+  el.style.left=(userMoved&&s.x!=null?s.x:pos.x)+'px';
+  el.style.top=(userMoved&&s.y!=null?s.y:pos.y)+'px';
+  el.style.zIndex=51;
   if(s.hidden)el.style.display='none';
   el.innerHTML=`<div class="sth"><span class="st-auth">${s.author}</span><button class="st-close" onclick="hideSticky('${s.fbKey}')">×</button></div><div class="st-body">${s.text.replace(/\n/g,'<br>')}</div><div class="st-time">${s.time}</div>`;
-  makeDraggable(el,s);document.getElementById('stickyLayer').appendChild(el);
+  el.addEventListener('click',e=>{if(e.target.classList.contains('st-close'))return;if(window._stickyDragged)return;});
+  makeDraggable(el,s);
+  document.getElementById('stickyLayer').appendChild(el);
+  clearTimeout(window._stickyReposTimer);
+  window._stickyReposTimer=setTimeout(repositionStickies,50);
 }
+
+function repositionStickies(){
+  const items=stickies.filter(s=>!s.hidden).sort((a,b)=>a.createdAt-b.createdAt||(a.time||'').localeCompare(b.time||''));
+  const GAP=12; let currentY=STICKY_HEADER_H;
+  items.forEach(s=>{
+    const el=document.getElementById(`s-${s.fbKey}`); if(!el)return;
+    if((window.stickyUserMoved||{})[s.fbKey])return;
+    el.style.left=STICKY_SNAP_X+'px'; el.style.top=currentY+'px';
+    currentY+=el.offsetHeight+GAP;
+  });
+}
+
+window.realignStickies=()=>{
+  window.stickyUserMoved={};
+  const items=stickies.filter(s=>!s.hidden).sort((a,b)=>a.createdAt-b.createdAt||(a.time||'').localeCompare(b.time||''));
+  const GAP=12; let currentY=STICKY_HEADER_H;
+  items.forEach(s=>{
+    const el=document.getElementById(`s-${s.fbKey}`); if(!el)return;
+    el.style.transition='left .4s cubic-bezier(.4,0,.2,1), top .4s cubic-bezier(.4,0,.2,1)';
+    el.style.left=STICKY_SNAP_X+'px'; el.style.top=currentY+'px';
+    currentY+=el.offsetHeight+GAP;
+    setTimeout(()=>{ el.style.transition=''; },450);
+  });
+  showToast('便利貼已對齊');
+};
+
 window.hideSticky=fbKey=>dbHideSticky(fbKey);
-window.showFromInbox=fbKey=>{const s=stickies.find(x=>x.fbKey===fbKey);if(!s)return;s.hidden=false;let el=document.getElementById(`s-${fbKey}`);if(el){el.style.display='';el.style.zIndex=99;}else renderStickyEl(s);document.getElementById('stickyInbox').classList.remove('open');updateStickyCount();};
+window.showFromInbox=fbKey=>{
+  const s=stickies.find(x=>x.fbKey===fbKey);if(!s)return;
+  s.hidden=false;
+  let el=document.getElementById(`s-${fbKey}`);
+  if(el){el.style.display='';el.style.zIndex=99;}else renderStickyEl(s);
+  document.getElementById('stickyInbox').classList.remove('open');
+  updateStickyCount();
+};
 window.delFromInbox=fbKey=>dbDeleteSticky(fbKey);
+
 function updateStickyCount(){document.getElementById('stickyCount').textContent=stickies.length;}
+
 function renderInbox(){
   const list=document.getElementById('inboxList');
-  if(!stickies.length){list.innerHTML='<div class="sib-empty">還沒有留言</div>';return;}
+  if(!stickies.length){list.innerHTML='<div class="sib-empty">還沒有便利貼</div>';return;}
   const cm={'sy':'#FFF9C4','sp':'#FFD6E7','sm':'#C8F7E4','sl':'#E2D9F3','so':'#FFE5D0'};
   list.innerHTML=stickies.map(s=>`<div class="sib-item" style="background:${cm[s.color]||'#fff'}"><div style="display:flex;align-items:center;justify-content:space-between"><span class="sib-auth">${s.author}</span><span style="display:flex;gap:6px"><span style="cursor:pointer" onclick="showFromInbox('${s.fbKey}')">📌</span><span style="cursor:pointer;opacity:.5" onclick="delFromInbox('${s.fbKey}')">🗑</span></span></div><div class="sib-text">${s.text.replace(/\n/g,'<br>')}</div><div class="sib-time">${s.time}</div></div>`).join('');
 }
+
 function makeDraggable(el,s){
   let ox,oy,drag=false;
-  el.addEventListener('mousedown',e=>{if(e.target.classList.contains('st-close'))return;drag=true;ox=e.clientX-el.offsetLeft;oy=e.clientY-el.offsetTop;el.style.zIndex=99;e.preventDefault();});
-  document.addEventListener('mousemove',e=>{if(!drag)return;el.style.left=Math.max(0,e.clientX-ox)+'px';el.style.top=Math.max(0,e.clientY-oy)+'px';s.x=e.clientX-ox;s.y=e.clientY-oy;});
-  document.addEventListener('mouseup',()=>{if(drag){drag=false;el.style.zIndex=51;}});
+  el.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('st-close'))return;
+    drag=true; window._stickyDragged=false;
+    ox=e.clientX-el.offsetLeft; oy=e.clientY-el.offsetTop;
+    el.style.zIndex=99; e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!drag)return; window._stickyDragged=true;
+    el.style.left=Math.max(0,e.clientX-ox)+'px';
+    el.style.top=Math.max(0,e.clientY-oy)+'px';
+    s.x=e.clientX-ox; s.y=e.clientY-oy;
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!drag)return; drag=false; el.style.zIndex=51;
+    if(window._stickyDragged){
+      window.stickyUserMoved=window.stickyUserMoved||{};
+      window.stickyUserMoved[s.fbKey]=true;
+    }
+  });
   el.addEventListener('touchstart',e=>{if(e.target.classList.contains('st-close'))return;drag=true;ox=e.touches[0].clientX-el.offsetLeft;oy=e.touches[0].clientY-el.offsetTop;},{passive:true});
   el.addEventListener('touchmove',e=>{if(!drag)return;el.style.left=Math.max(0,e.touches[0].clientX-ox)+'px';el.style.top=Math.max(0,e.touches[0].clientY-oy)+'px';e.preventDefault();},{passive:false});
   el.addEventListener('touchend',()=>{drag=false;});
 }
 
-/* ══ SWITCH TEAM ══ */
-let _spaceMenuOpen = false;
-window.closeSpaceMenu = () => {
-  _spaceMenuOpen = false;
-  document.getElementById('spaceMenu')?.classList.add('hidden');
-};
-window.switchTeam = (target) => {
-  document.getElementById('spaceCheck').checked = false;
-  if (target === currentTeam) return;
-  const cfg = TEAM_CONFIG[target];
-  const pw = prompt(`切換到「${cfg.label}」\n請輸入密碼：`);
-  if (pw === null) return;
-  if (pw !== cfg.password) { alert('密碼錯誤'); return; }
-  sessionStorage.setItem('vvd_team', target);
-  location.reload();
-};
+function renderStickyPage(){
+  const grid=document.getElementById('stickyPageGrid'); if(!grid)return;
+  const cm={'sy':'#FFF9C4','sp':'#FFD6E7','sm':'#C8F7E4','sl':'#E2D9F3','so':'#FFE5D0'};
+  if(!stickies.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;font-size:13px;color:var(--muted)">還沒有便利貼，點「新增便利貼」開始使用</div>';return;}
+  const sorted=[...stickies].sort((a,b)=>b.createdAt-a.createdAt||(b.time||'').localeCompare(a.time||''));
+  grid.innerHTML=sorted.map(s=>`
+    <div style="background:${cm[s.color]||'#fff'};border-radius:10px;padding:12px;${s.hidden?'opacity:.45':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:11px;font-weight:600;opacity:.7">${s.author||'匿名'}</span>
+        ${s.hidden?'<span style="font-size:10px;opacity:.5">已隱藏</span>':''}
+      </div>
+      <div style="font-size:12px;line-height:1.6;word-break:break-word;margin-bottom:8px">${s.text.replace(/\n/g,'<br>')}</div>
+      <div style="font-size:10px;opacity:.4;margin-bottom:8px">${s.time||''}</div>
+      <div style="display:flex;gap:8px">
+        ${s.hidden
+          ?`<button onclick="showFromInbox('${s.fbKey}')" style="font-size:11px;background:none;border:1px solid currentColor;border-radius:6px;padding:2px 8px;cursor:pointer;opacity:.6">📌 釘回</button>`
+          :`<button onclick="hideSticky('${s.fbKey}')" style="font-size:11px;background:none;border:1px solid currentColor;border-radius:6px;padding:2px 8px;cursor:pointer;opacity:.6">隱藏</button>`}
+        <button onclick="delFromInbox('${s.fbKey}')" style="font-size:11px;background:none;border:1px solid currentColor;border-radius:6px;padding:2px 8px;cursor:pointer;opacity:.6">🗑 刪除</button>
+      </div>
+    </div>`).join('');
+}
 
 /* ══ TOAST ══ */
 window.showToast=msg=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);};
 
 /* ══ INIT ══ */
-// Show team selector first (loading screen hidden initially)
-document.getElementById('loadingScreen').style.display='none';
-
-// Check if coming back from a team switch
-const _savedTeam = sessionStorage.getItem('vvd_team');
-if (_savedTeam && TEAM_CONFIG[_savedTeam]) {
-  sessionStorage.removeItem('vvd_team');
-  document.getElementById('teamSelectPage').classList.remove('active');
-  selectedTeam = _savedTeam;
-  currentTeam = _savedTeam;
-  teamDbPrefix = _savedTeam;
-  initApp();
-}
-
 async function initApp() {
-  const cfg = TEAM_CONFIG[currentTeam];
-  // Apply team branding
-  document.getElementById('mainBrandSub').textContent = cfg.brandSub;
-  // Show marquee or hide
-  const marqueeBar = document.getElementById('marqueeBar');
-  if (marqueeBar) marqueeBar.style.display = cfg.showMarquee ? '' : 'none';
-  // Show sticky panel or hide
-  const stickyPanel = document.getElementById('stickyPanel');
-  if (stickyPanel) stickyPanel.style.display = cfg.showSticky ? '' : 'none';
-
   const savedTheme = localStorage.getItem('vvdouble_theme') || 'light';
   setTheme(savedTheme);
-  document.getElementById('loadingMsg').textContent = '載入設定中...';
   document.getElementById('loadingScreen').style.display = '';
+  document.getElementById('loadingMsg').textContent = '載入設定中...';
   try {
     await loadConfig();
     document.getElementById('loadingMsg').textContent = '載入任務中...';
     listenTasks();
-    if (cfg.showSticky) listenStickies();
+    listenStickies();
     await new Promise(r=>setTimeout(r,800));
   } catch(e) {
     document.getElementById('loadingMsg').textContent = '連線失敗，請檢查網路';
@@ -1769,27 +1747,23 @@ async function initApp() {
   }
   document.getElementById('loadingScreen').classList.add('done');
   document.getElementById('mainPage').classList.add('active');
-  // Mark current team in space menu
-  document.getElementById('smMarketing')?.classList.toggle('current', currentTeam === 'marketing');
-  document.getElementById('smStore')?.classList.toggle('current', currentTeam === 'store');
-  // Space menu: click button focuses container, click outside blurs it
-  const spaceBtn = document.getElementById('spaceBtn');
-  if (spaceBtn) {
-    spaceBtn.setAttribute('tabindex', '0');
-    document.getElementById('spaceSwitcher').setAttribute('tabindex', '-1');
-  }
-  if (cfg.showMarquee) { buildMarquee(); } 
+  buildMarquee();
   buildColorRow();
-  if (cfg.showSticky) { buildStickyAuthorSelect(); }
+  buildStickyAuthorSelect();
   renderFilterBar('filterBar');renderFilterBar('filterBarKanban');renderFilterBar('filterBarList');
-  if (cfg.showCountdown) renderCountdowns();
-  calRender();
-  renderDashboard();
+  renderCountdowns(); calRender(); renderDashboard();
   setSyncing(false);
   document.getElementById('syncDot').className='sync-dot online';
   document.getElementById('syncText').textContent='已連線 Firebase';
   document.getElementById('syncStatus').classList.remove('hidden');
   setTimeout(()=>document.getElementById('syncStatus').classList.add('hidden'),3000);
+}
+
+// Check saved auth
+if (localStorage.getItem('vvd_mkt_auth')==='1' || sessionStorage.getItem('vvd_mkt_auth')==='1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = '';
+  initApp();
 }
 </script>
 </body>
