@@ -1541,6 +1541,7 @@ window.saveTask = async()=>{
   }):[];
   const data={title,tag:document.getElementById('f-tag').value,status:document.getElementById('f-status').value,date:document.getElementById('f-date').value,priority:document.getElementById('f-priority').value,note:noteRaw,checklist,assignee:document.getElementById('f-assignee').value};
   await dbSaveTask(data);closeOv('taskModal');showToast(editingId?'已更新任務':'已新增任務');
+};
 window.handleCLClick = async(taskId, idx)=>{
   const t=tasks.find(x=>x.id===taskId);if(!t||!t.fbKey)return;
   const checklist=[...(t.checklist||[])];
